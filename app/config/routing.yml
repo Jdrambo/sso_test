@@ -1,0 +1,19 @@
+jdr_user:
+    resource: "@JDRUserBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+jdr_main:
+    resource: "@JDRMainBundle/Resources/config/routing.yml"
+    prefix:   /
+
+login:
+    path: /login
+    defaults:
+        _controller: JDRUserBundle:Security:login
+
+login_check:
+    path: /login_check
+
+logout:
+    path: /logout

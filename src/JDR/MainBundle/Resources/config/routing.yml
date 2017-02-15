@@ -1,0 +1,7 @@
+jdr_main_homepage:
+    path:     /
+    defaults: { _controller: JDRMainBundle:Default:index }
+
+admin:
+    path:     /admin
+    defaults: { _controller: JDRMainBundle:Admin:adminEntry }
