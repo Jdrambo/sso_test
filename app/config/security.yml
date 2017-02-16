@@ -6,15 +6,15 @@ security:
     providers:
         main:
             entity:
-                class:      JDR\UserBundle\Entity\User
-                property:   email
+                class: JDR\UserBundle\Entity\User
+                property: email
 
     encoders:
         Symfony\Component\Security\Core\User\User: bcrypt
         JDR\UserBundle\Entity\User: bcrypt
 
     role_hierarchy:
-        ROLE_ADMIN:       ROLE_USER
+        ROLE_ADMIN: ROLE_USER
         ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     firewalls:
@@ -24,19 +24,18 @@ security:
             security: false
 
         main:
-            pattern:   ^/
+            pattern: ^/
             anonymous: true
-            form_login:
-                login_path: login
-                check_path: login_check
-                username_parameter: _email
-                default_target_path: admin
+            guard:
+                authenticators:
+                    - form_authenticator
+                entry_point: form_authenticator
             logout:
-                path:       logout
-                target:     /
+                path: logout
+                target: /
             switch_user: true
 
     access_control:
-        #- { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/dashboard, roles: ROLE_USER }
         - { path: ^/admin, roles: ROLE_ADMIN }
