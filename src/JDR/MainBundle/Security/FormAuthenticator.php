@@ -15,11 +15,20 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Core\Encoder\EncoderFactory;
 use Doctrine\ORM\EntityManager;
 
 class FormAuthenticator extends AbstractGuardAuthenticator
 {
+    /**
+    *   @var \Doctrine\ORM\EntityManager
+    */
     private $em;
+
+    /**
+    * @var \Symfony\Component\Security\Core\Encoder\EncoderFactory
+    */
+    private $encoder_service;
 
     /**
     * @var \Symfony\Component\Routing\RouterInterface
@@ -36,9 +45,10 @@ class FormAuthenticator extends AbstractGuardAuthenticator
     /**
     * Creates a new instance of FormAuthenticator
     */
-    public function __construct(EntityManager $em, RouterInterface $router) {
+    public function __construct(EntityManager $em, RouterInterface $router, EncoderFactory $encoder_service) {
         $this->router = $router;
         $this->em = $em;
+        $this->encoder_service = $encoder_service;
     }
 
     /**
@@ -66,13 +76,10 @@ class FormAuthenticator extends AbstractGuardAuthenticator
         {
             throw new CustomUserMessageAuthenticationException('Votre adresse e-mail ne peut pas commencer par un @');
         }
-
-        try {
-            return ($this->em->getRepository('JDRUserBundle:User')->findOneByEmail($email));
-        }
-        catch (UsernameNotFoundException $e) {
-            throw new CustomUserMessageAuthenticationException($this->failMessage);
-        }
+        $user = $this->em->getRepository('JDRUserBundle:User')->findOneByEmail($email);
+        if ($user)
+            return ($user);
+        throw new CustomUserMessageAuthenticationException('Identifiants incorrects');
     }
 
     /**
@@ -80,14 +87,12 @@ class FormAuthenticator extends AbstractGuardAuthenticator
     */
     public function checkCredentials($credentials, UserInterface $user)
     {
-        $encoder_service = $this->get('security.encoder_factory');
-        $encoder = $encoder_service->getEncoder($user);
+        $encoder = $this->encoder_service->getEncoder($user);
         
-        
-        if (password_verify($user->getPassword())) {
+        if ($encoder->isPasswordValid($user->getPassword(), $credentials['password'], $user->getSalt())) {
           return true;
         }
-        throw new CustomUserMessageAuthenticationException($this->failMessage);
+        throw new CustomUserMessageAuthenticationException('Identifiants incorrects');
     }
 
     /**

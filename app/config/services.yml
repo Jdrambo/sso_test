@@ -9,4 +9,4 @@ services:
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
     form_authenticator:
             class: JDR\MainBundle\Security\FormAuthenticator
-            arguments: ['@doctrine.orm.entity_manager', '@router']
+            arguments: ['@doctrine.orm.entity_manager', '@router', '@security.encoder_factory']
